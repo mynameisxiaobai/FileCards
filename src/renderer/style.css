@@ -189,6 +189,20 @@ body {
   background: var(--accent-soft);
 }
 
+/* 右上角关闭：这里是真的退出进程（不是隐藏到托盘），悬停转红以示区别 */
+.btn-quit {
+  margin-left: 2px;
+}
+
+.btn-quit:hover {
+  background: rgba(214, 48, 49, 0.1);
+  color: #d63031;
+}
+
+.btn-quit:active {
+  background: rgba(214, 48, 49, 0.18);
+}
+
 /* 顶部菜单项：收集文件 */
 
 .menu-btn {

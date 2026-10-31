@@ -37,6 +37,7 @@ contextBridge.exposeInMainWorld('bridge', {
   setBounds: (b) => ipcRenderer.invoke('win:set-bounds', b),
   setAlwaysOnTop: (v) => ipcRenderer.invoke('win:always-on-top', v),
   hideToTray: () => ipcRenderer.invoke('win:hide'),
+  quit: () => ipcRenderer.invoke('app:quit'),
 
   reveal: (p) => ipcRenderer.invoke('shell:reveal', p),
   openPath: (p) => ipcRenderer.invoke('shell:open', p),

@@ -9,6 +9,7 @@ const pinBtn = document.getElementById('pin');
 const addBtn = document.getElementById('add');
 const hideBtn = document.getElementById('hide');
 const collectBtn = document.getElementById('collect');
+const quitBtn = document.getElementById('quit');
 const detailEl = document.getElementById('detail');
 const detailListEl = document.getElementById('detail-list');
 const detailCloseBtn = document.getElementById('detail-close');
@@ -643,6 +644,7 @@ function bindGlobal() {
   });
 
   hideBtn.addEventListener('click', () => API.hideToTray());
+  quitBtn.addEventListener('click', () => API.quit());
   collectBtn.addEventListener('click', () => API.openCollect());
   detailCloseBtn.addEventListener('click', closeDetail);
   scrimEl.addEventListener('click', closeDetail);

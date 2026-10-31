@@ -558,6 +558,14 @@ function registerIpc() {
     updateTrayMenu();
   });
 
+  // 标题栏右上角的关闭按钮：真的退出进程。
+  // 与「隐藏到托盘」是两条不同的路径，所以单独一个通道，不复用 win:hide。
+  ipcMain.handle('app:quit', () => {
+    quitting = true;
+    app.quit();
+    return { ok: true };
+  });
+
   // 自绘边框缩放用：渲染层拿鼠标屏幕坐标算差值，这里只负责落地
   ipcMain.handle('win:get-bounds', () => {
     if (!win || win.isDestroyed()) return null;

@@ -1,0 +1,835 @@
+/* ==========================================================================
+   归位 · style
+   注意：窗口圆角由 Windows 11 DWM 绘制（BrowserWindow roundedCorners），
+   所以这里绝对不要给 html/body 写 border-radius + overflow:hidden，
+   否则会出现「窗口方角 + 内容圆角」的四角白块。
+   ========================================================================== */
+
+:root {
+  /* 卡片不再固定边长：网格吃满窗口，只保证这圈留白恒定 */
+  --grid-pad: 14px;
+  --gap: 10px;
+  --card-pad: 12px;
+  --titlebar: 34px;
+
+  --bg: #f7f8fa;
+  --card: #ffffff;
+  --card-hover: #fcfcfd;
+  --sunken: #f2f3f5;
+
+  --border: rgba(17, 24, 39, 0.08);
+  --border-strong: rgba(17, 24, 39, 0.16);
+
+  --text: #1f2328;
+  --text-muted: #6b7280;
+  --text-faint: #9aa1ab;
+
+  --accent: #2f6feb;
+  --accent-soft: rgba(47, 111, 235, 0.07);
+  --success: #12805c;
+  --success-soft: rgba(18, 128, 92, 0.09);
+  --warn: #b45309;
+  --warn-soft: rgba(180, 83, 9, 0.1);
+  --danger: #c2410c;
+  --danger-soft: rgba(194, 65, 12, 0.09);
+
+  --r-card: 14px;
+  --r-inner: 10px;
+  --r-pill: 999px;
+
+  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+  --shadow-lift: 0 4px 12px rgba(16, 24, 40, 0.09), 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-float: 0 10px 30px rgba(16, 24, 40, 0.16), 0 2px 6px rgba(16, 24, 40, 0.06);
+  --ring-accent: 0 0 0 3px rgba(47, 111, 235, 0.14);
+
+  --font: "Segoe UI Variable Text", "Segoe UI", "Microsoft YaHei UI", "PingFang SC",
+    system-ui, -apple-system, sans-serif;
+
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur: 160ms;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  cursor: default;
+  user-select: none;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* --------------------------------------------------------------- 基础工具 */
+
+.is-hidden {
+  display: none !important;
+}
+
+/* 行内重命名输入框 */
+.card-name-input {
+  width: 100%;
+  margin: -2px 0 0;
+  padding: 1px 4px;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text);
+  background: #fff;
+  border: 1px solid var(--accent);
+  border-radius: 5px;
+  outline: none;
+  box-shadow: var(--ring-accent);
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
+
+/* ---------------------------------------------------------------- titlebar */
+
+.titlebar {
+  height: var(--titlebar);
+  flex: 0 0 var(--titlebar);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px 0 12px;
+
+  /* 只有这一条可以拖窗口。绝不要加到 body 或卡片上：
+     app-region: drag 会让区域变成 non-client，忽略所有指针事件，
+     卡片的 drop 会彻底收不到。 */
+  -webkit-app-region: drag;
+  app-region: drag;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.brand-mark {
+  width: 15px;
+  height: 15px;
+  color: var(--text);
+  display: block;
+}
+.brand-mark svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.brand-text {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.icon-btn {
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  transition: background-color 120ms linear, color 120ms linear, opacity 120ms linear;
+}
+
+.icon-btn svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+.icon-btn:hover {
+  background: rgba(17, 24, 39, 0.06);
+  color: var(--text);
+}
+
+.icon-btn:active {
+  background: rgba(17, 24, 39, 0.1);
+}
+
+.icon-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+  background: transparent;
+}
+
+#pin.on {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* 顶部菜单项：收集文件 */
+
+.menu-btn {
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+  height: 24px;
+  margin-right: 4px;
+  padding: 0 9px 0 7px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 120ms linear, color 120ms linear;
+}
+
+.menu-btn svg {
+  width: 13px;
+  height: 13px;
+  display: block;
+  flex: 0 0 auto;
+}
+
+.menu-btn:hover {
+  background: rgba(17, 24, 39, 0.06);
+  color: var(--text);
+}
+
+.menu-btn:active {
+  background: rgba(17, 24, 39, 0.1);
+}
+
+/* 窗口收得很窄时先让文字让位，只留图标 */
+@media (max-width: 268px) {
+  .menu-btn span {
+    display: none;
+  }
+  .menu-btn {
+    padding: 0 5px;
+  }
+  .brand-text {
+    display: none;
+  }
+}
+
+/* -------------------------------------------------------------------- grid */
+
+.grid {
+  flex: 1 1 auto;
+  display: grid;
+  /* 12 条等宽轨道，卡片按 span 均分：2 张 = 6+6，3 张 = 4+4+4，
+     5 张 = 4+4+4 / 6+6，最后一行也永远铺满，不留豁口。
+     卡片本身不再固定正方形，直接吃满可用空间，与窗口边缘的留白恒定不变。 */
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: repeat(var(--rows, 1), minmax(0, 1fr));
+  gap: var(--gap);
+  padding: var(--grid-pad);
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ------------------------------------------------------------ 缩放热区 */
+/* 窗口 frame:false，Windows 自带的缩放边只有 1-2px，很难抓。
+   这里在客户区内侧再铺一圈 6px / 14px 的热区，光标即提示，命中率高得多。 */
+
+.rz {
+  position: absolute;
+  z-index: 40;
+  background: transparent;
+  transition: background-color 120ms linear;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
+
+.rz:hover {
+  background: rgba(47, 111, 235, 0.1);
+}
+
+.rz-n,
+.rz-s {
+  left: 4px;
+  right: 4px;
+  height: 6px;
+  cursor: ns-resize;
+}
+.rz-n {
+  top: 0;
+}
+.rz-s {
+  bottom: 0;
+}
+
+.rz-w,
+.rz-e {
+  top: 4px;
+  bottom: 4px;
+  width: 6px;
+  cursor: ew-resize;
+}
+.rz-w {
+  left: 0;
+}
+.rz-e {
+  right: 0;
+}
+
+.rz-nw,
+.rz-ne,
+.rz-sw,
+.rz-se {
+  width: 14px;
+  height: 14px;
+}
+.rz-nw {
+  top: 0;
+  left: 0;
+  cursor: nwse-resize;
+}
+.rz-se {
+  bottom: 0;
+  right: 0;
+  cursor: nwse-resize;
+}
+.rz-ne {
+  top: 0;
+  right: 0;
+  cursor: nesw-resize;
+}
+.rz-sw {
+  bottom: 0;
+  left: 0;
+  cursor: nesw-resize;
+}
+
+/* 拖拽缩放期间：鼠标可能跑到窗口外，光标别丢 */
+body.is-resizing,
+body.is-resizing * {
+  user-select: none !important;
+}
+
+/* -------------------------------------------------------------------- card */
+
+.card {
+  position: relative;
+  /* 尺寸由网格单元决定（铺满），这里只管内部排版。
+     字号是固定值，不随卡片变大而放大。 */
+  min-width: 0;
+  min-height: 0;
+  padding: var(--card-pad);
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  cursor: pointer;
+
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+
+  transition:
+    transform var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease),
+    border-color 140ms linear,
+    background-color 140ms linear;
+  will-change: transform;
+}
+
+.card * {
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
+
+.card:hover {
+  background: var(--card-hover);
+  box-shadow: var(--shadow-lift);
+}
+
+/* 未绑定目录 */
+.card.is-unset {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--border-strong);
+  box-shadow: none;
+}
+.card.is-unset:hover {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(17, 24, 39, 0.26);
+}
+
+/* 拖入悬停 */
+.card.is-over {
+  transform: scale(1.025);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  /* 用 ring 模拟更粗的边框，避免改 border-width 引起 1px 内容位移 */
+  box-shadow: var(--shadow-card), 0 0 0 1.5px var(--accent), 0 0 0 4px rgba(47, 111, 235, 0.1);
+}
+
+.card.is-over .card-hint {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 完全隐去原内容：只留「松开即移动」，避免和目录路径叠字 */
+.card.is-over .card-body {
+  opacity: 0;
+}
+
+/* 处理中 */
+.card.is-busy {
+  cursor: progress;
+}
+.card.is-busy .card-body {
+  opacity: 0.4;
+}
+
+.card.is-success {
+  animation: pop 460ms var(--ease);
+}
+.card.is-error {
+  animation: shake 340ms ease-in-out;
+  border-color: rgba(194, 65, 12, 0.4);
+}
+
+@keyframes pop {
+  0% {
+    box-shadow: var(--shadow-card), 0 0 0 0 rgba(18, 128, 92, 0.3);
+  }
+  55% {
+    box-shadow: var(--shadow-card), 0 0 0 9px rgba(18, 128, 92, 0);
+  }
+  100% {
+    box-shadow: var(--shadow-card), 0 0 0 0 rgba(18, 128, 92, 0);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  22% {
+    transform: translateX(-3px);
+  }
+  62% {
+    transform: translateX(3px);
+  }
+}
+
+/* 卡片内容 */
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  /* 必须撑满卡片，否则状态条贴不到底 */
+  flex: 1 1 auto;
+  min-height: 0;
+  transition: opacity 120ms linear;
+}
+
+/* 图标 + 名称 + 路径这一组：在状态条以上的空间里垂直居中。
+   卡片被拖高后内容不会孤零零吊在顶部。 */
+.card-main {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.card-icon {
+  width: 28px;
+  height: 28px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  flex: 0 0 auto;
+  transition: color 140ms linear;
+}
+
+.card:hover .card-icon {
+  color: var(--text);
+}
+
+.card.is-unset .card-icon {
+  color: var(--text-faint);
+}
+
+.card.is-unset .card-path {
+  color: var(--text-muted);
+}
+
+.card-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.card-name {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.005em;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 0 0 auto;
+}
+
+.card-path {
+  margin-top: 3px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 0 0 auto;
+}
+
+/* 状态条：贴到卡片底部的一条淡色带，有内容时才出现，
+   没有内容时卡片保持全白干净（:empty 直接隐藏） */
+.card-status {
+  flex: 0 0 auto;
+  margin: 0 calc(-1 * var(--card-pad)) calc(-1 * var(--card-pad));
+  padding: 6px var(--card-pad) 7px;
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: var(--text-faint);
+  background: rgba(17, 24, 39, 0.014);
+  border-top: 1px solid rgba(17, 24, 39, 0.055);
+  border-radius: 0 0 calc(var(--r-card) - 1px) calc(var(--r-card) - 1px);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-status:empty {
+  display: none;
+}
+
+.card-status.is-ok {
+  color: var(--success);
+}
+.card-status.is-warn {
+  color: var(--warn);
+}
+.card-status.is-err {
+  color: var(--danger);
+  cursor: pointer;
+  font-weight: 500;
+}
+.card-status.is-err:hover,
+.card-status.is-warn:hover {
+  background: rgba(17, 24, 39, 0.03);
+}
+.card-status.is-warn {
+  color: var(--warn);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+/* 拖入时的浮层文案 */
+.card-hint {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--accent);
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity 140ms var(--ease), transform 140ms var(--ease);
+  pointer-events: none;
+}
+
+/* 删除按钮 */
+.card-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 120ms linear, background-color 120ms linear, color 120ms linear;
+}
+
+.card-remove svg {
+  width: 10px;
+  height: 10px;
+  display: block;
+}
+
+.card:hover .card-remove {
+  opacity: 1;
+}
+
+.card-remove:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+/* ----------------------------------------------------- 小窗口下的紧凑排版 */
+/* 字号固定，不跟着卡片缩放；卡片被拖得很矮时靠「让位」保证不出乱子。 */
+
+/* 卡片偏矮：状态条只留一行，别把正文挤掉 */
+.grid.is-compact .card {
+  --card-pad: 10px;
+}
+
+.grid.is-compact .card-status {
+  -webkit-line-clamp: 1;
+}
+
+/* 再矮一档：图标让位给文字 */
+.grid.is-tiny .card {
+  --card-pad: 8px;
+}
+
+.grid.is-tiny .card-icon {
+  display: none;
+}
+
+.grid.is-tiny .card-name {
+  font-size: 12.5px;
+}
+
+.grid.is-tiny .card-remove {
+  top: 3px;
+  right: 3px;
+  width: 16px;
+  height: 16px;
+}
+
+.grid.is-tiny .card-remove svg {
+  width: 8px;
+  height: 8px;
+}
+
+/* ------------------------------------------------------------ detail 浮层 */
+
+/* 详情浮层背后的极淡遮罩：让「谁在上面」一眼可辨，点击即关闭 */
+.scrim {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--titlebar);
+  bottom: 0;
+  background: rgba(247, 248, 250, 0.62);
+  backdrop-filter: blur(1.5px);
+  z-index: 19;
+  animation: fade 160ms linear;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.detail {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  /* 贴底向上生长：高度跟随内容，同时盖住卡片状态条，不会露出半截 */
+  bottom: 8px;
+  top: auto;
+  max-height: calc(100% - 44px);
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-float);
+  z-index: 20;
+  overflow: hidden;
+  animation: rise 180ms var(--ease);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.detail-head {
+  flex: 0 0 auto;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px 0 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.detail-title {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.detail-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.detail-list::-webkit-scrollbar {
+  width: 6px;
+}
+.detail-list::-webkit-scrollbar-thumb {
+  background: rgba(17, 24, 39, 0.16);
+  border-radius: 3px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.detail-item + .detail-item {
+  border-top: 1px solid rgba(17, 24, 39, 0.05);
+}
+
+.detail-item .mark {
+  flex: 0 0 auto;
+  width: 12px;
+  height: 12px;
+  margin-top: 1px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 8px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.detail-item.ok .mark {
+  background: var(--success);
+}
+.detail-item.warn .mark {
+  background: var(--warn);
+}
+.detail-item.err .mark {
+  background: var(--danger);
+}
+.detail-item.skip .mark {
+  background: var(--text-faint);
+}
+
+.detail-item .name {
+  color: var(--text);
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.detail-item .msg {
+  color: var(--text-faint);
+  word-break: break-all;
+}
+
+/* ------------------------------------------------------------------- toast */
+
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  max-width: calc(100% - 32px);
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  background: rgba(31, 35, 40, 0.94);
+  color: #fff;
+  font-size: 11.5px;
+  line-height: 1.4;
+  text-align: center;
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.24);
+  z-index: 30;
+  animation: toastIn 160ms var(--ease);
+  pointer-events: none;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 4px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* --------------------------------------------------------------- 降级动效 */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}

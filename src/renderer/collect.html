@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self';"
+    />
+    <title>收集文件</title>
+    <link rel="stylesheet" href="collect.css" />
+  </head>
+  <body>
+    <header class="tb">
+      <div class="tb-brand">
+        <span class="tb-mark" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round">
+            <path d="M2.2 9.1V12a1.4 1.4 0 0 0 1.4 1.4h8.8A1.4 1.4 0 0 0 13.8 12V9.1" />
+            <path d="M8 2.2v7.1M5.3 6.6 8 9.3l2.7-2.7" />
+          </svg>
+        </span>
+        <span class="tb-title">收集文件</span>
+      </div>
+      <button id="close" class="icon-btn" title="关闭" aria-label="关闭">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+          <path d="M4.5 4.5l7 7M11.5 4.5l-7 7" />
+        </svg>
+      </button>
+    </header>
+
+    <main class="body">
+      <section class="field">
+        <div class="label">
+          源文件夹<span class="label-hint">里面的文件会平铺到目标文件夹</span>
+        </div>
+        <div class="drop" id="drop-src" role="button" tabindex="0">
+          <span class="drop-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+              <path d="M3.2 7.4A1.6 1.6 0 0 1 4.8 5.8h3.4l1.7 2.1h8.3A1.6 1.6 0 0 1 19.8 9.5v7.1a1.6 1.6 0 0 1-1.6 1.6H4.8a1.6 1.6 0 0 1-1.6-1.6z" />
+            </svg>
+          </span>
+          <div class="drop-text">
+            <div class="drop-name">拖入文件夹，或点击选择</div>
+            <div class="drop-path"></div>
+          </div>
+          <span class="drop-action" aria-hidden="true">选择</span>
+        </div>
+      </section>
+
+      <section class="field">
+        <div class="label">
+          目标文件夹<span class="label-hint">所有文件平铺到这里，不会覆盖同名文件</span>
+        </div>
+        <div class="drop" id="drop-tgt" role="button" tabindex="0">
+          <span class="drop-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+              <path d="M3.2 7.4A1.6 1.6 0 0 1 4.8 5.8h3.4l1.7 2.1h8.3A1.6 1.6 0 0 1 19.8 9.5v7.1a1.6 1.6 0 0 1-1.6 1.6H4.8a1.6 1.6 0 0 1-1.6-1.6z" />
+              <path d="M12 15.4v-4.6M10.1 12.7 12 10.8l1.9 1.9" />
+            </svg>
+          </span>
+          <div class="drop-text">
+            <div class="drop-name">拖入文件夹，或点击选择</div>
+            <div class="drop-path"></div>
+          </div>
+          <span class="drop-action" aria-hidden="true">选择</span>
+        </div>
+      </section>
+
+      <div class="opts">
+        <label class="opt" title="按子文件夹的顺序给文件名加 1_ / 2_ 前缀，来自不同文件夹的同名文件就不会撞">
+          <input type="checkbox" id="opt-prefix" checked />
+          <span>文件名加序号前缀</span>
+        </label>
+        <label class="opt opt-warn" title="复制成功后删除源文件；关掉则表示只复制">
+          <input type="checkbox" id="opt-move" />
+          <span>移走后删除原文件</span>
+        </label>
+      </div>
+
+      <div id="tips" class="tips">
+        <div class="tip">
+          <span class="tip-dot" aria-hidden="true"></span>
+          <span><b>按文件夹排序编号</b> 每个子文件夹一个序号，文件名前面加 <code>1_</code></span>
+        </div>
+        <div class="tip">
+          <span class="tip-dot" aria-hidden="true"></span>
+          <span><b>绝不覆盖</b> 目标里已有同名，自动加 <code>_1</code>，两份都留着</span>
+        </div>
+        <div class="tip">
+          <span class="tip-dot" aria-hidden="true"></span>
+          <span><b>默认只复制</b> 源文件夹里的东西一个都不会动</span>
+        </div>
+      </div>
+
+      <div id="note" class="note is-hidden"></div>
+
+      <div id="run" class="run is-hidden">
+        <div class="bar"><i id="bar-fill"></i></div>
+        <div class="run-line">
+          <span id="run-text">准备中…</span>
+          <span id="run-count"></span>
+        </div>
+      </div>
+
+      <div id="result" class="result is-hidden">
+        <div id="result-head" class="result-head"></div>
+        <ul id="result-list" class="result-list"></ul>
+      </div>
+    </main>
+
+    <footer class="foot">
+      <button id="open-target" class="link is-hidden">打开目标文件夹</button>
+      <div class="spacer"></div>
+      <button id="cancel" class="btn">取消</button>
+      <button id="start" class="btn primary">开始收集</button>
+    </footer>
+
+    <script src="collect.js"></script>
+  </body>
+</html>

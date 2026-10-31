@@ -1,0 +1,60 @@
+{
+  "name": "file-cards",
+  "productName": "FileCards",
+  "version": "1.0.0",
+  "description": "把文件拖进卡片，自动归位到指定目录",
+  "main": "src/main.js",
+  "private": true,
+  "author": "leiyi",
+  "license": "MIT",
+  "homepage": "https://github.com/leiyi/file-cards",
+  "scripts": {
+    "start": "electron .",
+    "test": "node test/mover.test.js && node test/collect.test.js",
+    "icons": "node scripts/gen-icons.js",
+    "build": "electron-builder --win",
+    "build:portable": "electron-builder --win portable",
+    "build:zip": "electron-builder --win zip"
+  },
+  "devDependencies": {
+    "electron": "^45.2.1",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "info.leiyi.filecards",
+    "productName": "FileCards",
+    "copyright": "Copyright © 2026 leiyi",
+    "asar": true,
+    "compression": "maximum",
+    "directories": {
+      "output": "release",
+      "buildResources": "assets"
+    },
+    "files": [
+      "src/**/*",
+      "assets/tray.png",
+      "assets/icon.png",
+      "package.json",
+      "!**/*.map"
+    ],
+    "win": {
+      "icon": "assets/icon.png",
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64"]
+        }
+      ],
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "portable": {
+      "artifactName": "FileCards-${version}-portable.exe",
+      "requestExecutionLevel": "user",
+      "unpackDirName": "FileCards"
+    }
+  }
+}
